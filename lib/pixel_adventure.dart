@@ -21,6 +21,11 @@ class PixelAdventure extends FlameGame{
   @override
   Future<void> onLoad() async{
 
+    await images.loadAllImages();
+    //성능 이슈를 해결하기 위해 미리 최상위 게임 클래스에서 모든 asset 이미지들을 불러온다
+    //이미지를 사용하려면 앞으로 HasGameRef<PixelAdventure>를 mixin을 하여 game.images.fromCache('Main characters/Ninja Frog/Idle (32x32).png')
+    //형식으로 이미지를 가져와 사용하도록 하자
+
     cam = CameraComponent.withFixedResolution(width: 640, height: 368,world: level2 );
     //해당 월드의 해상도와 맞게 적용해야 한다. New Map 을 할때 Map Size를 정하는데,
     //그때 밑에 표시된 해상도를 똑같이 적용하면 된다.
