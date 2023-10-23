@@ -12,7 +12,9 @@ class Player extends SpriteAnimationGroupComponent
 
   String character;
 
-  Player({required this.character});
+
+
+  Player({required this.character, required position}) : super(position: position);
 
   //Animation Variables
   late final SpriteAnimation _idleAnimation;

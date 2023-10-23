@@ -3,16 +3,34 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "",
+    "activeFile": "level-01.tmx",
     "expandedProjectPaths": [
+        "."
     ],
     "fileStates": {
+        "C:/Users/iz/Documents/GitHub/iz_web_flutter/assets/game/bomb/terrain_tileset.tsx": {
+            "scaleInDock": 1
+        },
+        "background_tileset.tsx": {
+            "scaleInDock": 1
+        },
         "level-01.tmx": {
-            "scale": 4,
-            "selectedLayer": 0,
+            "scale": 3,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 283.375,
-                "y": 204.125
+                "x": 352.6666666666667,
+                "y": 218.16666666666666
+            }
+        },
+        "level-02.tmx": {
+            "expandedObjectLayers": [
+                3
+            ],
+            "scale": 2,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 210.75,
+                "y": 389
             }
         },
         "pixel_adventure.tsx": {
@@ -27,11 +45,14 @@
     "map.tileWidth": 16,
     "map.width": 40,
     "openFiles": [
+        "level-02.tmx",
+        "level-01.tmx"
     ],
     "project": "pixel_adventure.tiled-project",
     "recentFiles": [
-        "pixel_adventure.tsx",
-        "level-01.tmx"
+        "level-02.tmx",
+        "level-01.tmx",
+        "pixel_adventure.tsx"
     ],
     "tileset.lastUsedFormat": "tsx",
     "tileset.tileSize": {

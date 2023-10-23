@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="40" height="23" tilewidth="16" tileheight="16" infinite="0" nextlayerid="2" nextobjectid="1">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="40" height="23" tilewidth="16" tileheight="16" infinite="0" nextlayerid="4" nextobjectid="6">
  <tileset firstgid="1" source="pixel_adventure.tsx"/>
  <tileset firstgid="243" source="background_tileset.tsx"/>
  <layer id="1" name="Tile Layer 1" width="40" height="23">
@@ -29,4 +29,8 @@
 51,52,52,52,52,52,52,52,52,52,52,52,52,52,52,53,251,252,253,51,52,52,52,52,52,52,52,52,52,52,52,52,52,52,52,52,52,52,52,53
 </data>
  </layer>
+ <objectgroup id="3" name="spawnpoints">
+  <object id="1" type="player" x="64" y="288" width="32" height="32"/>
+  <object id="2" type="enemy" x="432" y="256" width="32" height="32"/>
+ </objectgroup>
 </map>

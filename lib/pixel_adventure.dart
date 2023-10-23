@@ -3,14 +3,12 @@ import 'dart:ui';
 import 'package:flame/camera.dart';
 import 'package:flame/game.dart';
 import 'package:flame/widgets.dart';
-import 'package:flutterflametest/levels/level_1.dart';
-import 'package:flutterflametest/levels/level_2.dart';
+import 'package:flutterflametest/levels/level.dart';
 
 class PixelAdventure extends FlameGame{
 
   late final CameraComponent cam;
-  final Level1 level1 = Level1();
-  final Level2 level2 = Level2();
+  final Level level = Level(levelName: 'level-01');
 
 
   @override
@@ -26,7 +24,7 @@ class PixelAdventure extends FlameGame{
     //이미지를 사용하려면 앞으로 HasGameRef<PixelAdventure>를 mixin을 하여 game.images.fromCache('Main characters/Ninja Frog/Idle (32x32).png')
     //형식으로 이미지를 가져와 사용하도록 하자
 
-    cam = CameraComponent.withFixedResolution(width: 640, height: 368,world: level2 );
+    cam = CameraComponent.withFixedResolution(width: 640, height: 368,world: level );
     //해당 월드의 해상도와 맞게 적용해야 한다. New Map 을 할때 Map Size를 정하는데,
     //그때 밑에 표시된 해상도를 똑같이 적용하면 된다.
 
@@ -34,7 +32,7 @@ class PixelAdventure extends FlameGame{
 
 
     add(cam);
-    add(level2);
+    add(level);
     //또는 addAll([cam,myWorld]); 도 가능
 
     return super.onLoad();
