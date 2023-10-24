@@ -6,13 +6,13 @@ enum PlayerState {
   running,
 }
 
+enum PlayerDirection {left, right, none}
+
 class Player extends SpriteAnimationGroupComponent
     with HasGameRef<PixelAdventure> {
   // 최상위 수준의 게임클래스를 참조하기 위해 Mixin으로 선언
 
   String character;
-
-
 
   Player({required this.character, required position}) : super(position: position);
 
@@ -20,19 +20,32 @@ class Player extends SpriteAnimationGroupComponent
   late final SpriteAnimation _idleAnimation;
   late final SpriteAnimation _runningAnimation;
 
+  PlayerDirection playerDirection = PlayerDirection.none;
+  double moveSpeed = 100;
+  Vector2 velocity = Vector2.zero();
+
   @override
   Future<void> onLoad() async {
     _loadAllAnimations();
     return super.onLoad();
   }
 
+
+  //업데이트는 매 프레임마다 호출되며 컴퓨터의 프레임이 초당 10Fps일 경우 초당 10번 호출된다.
+  //dt : DeltaTime을 의미하며 프레임 사이의 속도를 나타낸다
+  @override
+  void update(double dt) {
+    _updatePlayerMovement(dt);
+    super.update(dt);
+  }
+
   void _loadAllAnimations() {
     _idleAnimation =
-        loadAnimation(character: character, state: 'Idle', amount: 11);
+        _loadAnimation(character: character, state: 'Idle', amount: 11);
     //캐릭터로 쓸 스프라이트 이미지를 불러와 idleAnimation 변수에 저장한다.
 
     _runningAnimation =
-        loadAnimation(character: character, state: 'Run', amount: 12);
+        _loadAnimation(character: character, state: 'Run', amount: 12);
 
     animations = {
       PlayerState.idle: _idleAnimation,
@@ -44,7 +57,7 @@ class Player extends SpriteAnimationGroupComponent
     //current = PlayerState.running;
   }
 
-  SpriteAnimation loadAnimation(
+  SpriteAnimation _loadAnimation(
       {required String character,
       required String state,
       required int amount,
@@ -58,5 +71,31 @@ class Player extends SpriteAnimationGroupComponent
         textureSize: Vector2.all(32),
       ),
     );
+  }
+
+
+  void _updatePlayerMovement(double dt){
+    double dirX = 0.0;
+
+    switch(playerDirection){
+      case PlayerDirection.left:
+        current = PlayerState.running;
+        dirX -= moveSpeed;
+        break;
+      case PlayerDirection.right:
+        current = PlayerState.running;
+        dirX += moveSpeed;
+        break;
+      case PlayerDirection.none:
+        current = PlayerState.idle;
+        break;
+
+      default:
+    }
+
+    velocity = Vector2(dirX, 0.0);
+    position += velocity*dt;
+    //만약 프레임이 낮아지게 되면 프레임 간 dt가 커지게 되고 다음 position의 값은 커지게 되므로
+    //프레임 간섭에 의한 이동속도 차이가 사라지게 된다.
   }
 }
