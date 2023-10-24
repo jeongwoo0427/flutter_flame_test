@@ -1,11 +1,12 @@
 import 'dart:ui';
 
 import 'package:flame/camera.dart';
+import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 import 'package:flame/widgets.dart';
 import 'package:flutterflametest/levels/level.dart';
 
-class PixelAdventure extends FlameGame{
+class PixelAdventure extends FlameGame with HasKeyboardHandlerComponents{
 
   late final CameraComponent cam;
   final Level level = Level(levelName: 'level-01');

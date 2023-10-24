@@ -1,4 +1,5 @@
 import 'package:flame/components.dart';
+import 'package:flutter/services.dart';
 import 'package:flutterflametest/pixel_adventure.dart';
 
 enum PlayerState {
@@ -6,21 +7,25 @@ enum PlayerState {
   running,
 }
 
-enum PlayerDirection {left, right, none}
+enum PlayerMovementDirection { left, right, none }
+
+enum PlayerFacingDirection { left, right }
 
 class Player extends SpriteAnimationGroupComponent
-    with HasGameRef<PixelAdventure> {
+    with HasGameRef<PixelAdventure>, KeyboardHandler {
   // 최상위 수준의 게임클래스를 참조하기 위해 Mixin으로 선언
 
   String character;
 
-  Player({required this.character, required position}) : super(position: position);
+  Player({required this.character, required position})
+      : super(position: position);
 
   //Animation Variables
   late final SpriteAnimation _idleAnimation;
   late final SpriteAnimation _runningAnimation;
 
-  PlayerDirection playerDirection = PlayerDirection.none;
+  PlayerMovementDirection playerMoveDirection = PlayerMovementDirection.none;
+  PlayerFacingDirection playerFacingDirection = PlayerFacingDirection.right;
   double moveSpeed = 100;
   Vector2 velocity = Vector2.zero();
 
@@ -30,13 +35,36 @@ class Player extends SpriteAnimationGroupComponent
     return super.onLoad();
   }
 
-
   //업데이트는 매 프레임마다 호출되며 컴퓨터의 프레임이 초당 10Fps일 경우 초당 10번 호출된다.
   //dt : DeltaTime을 의미하며 프레임 사이의 속도를 나타낸다
   @override
   void update(double dt) {
     _updatePlayerMovement(dt);
     super.update(dt);
+  }
+
+  //키보드의 입력이 감지되면 호출
+  @override
+  bool onKeyEvent(RawKeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
+    // TODO : 반드시 최상위 게임 클래스에 HasKeyboardHandlerComponents mixin을 해줘야 사용이 가능하다.
+    final bool isLeftKeyPressed =
+        keysPressed.contains(LogicalKeyboardKey.keyA) ||
+            keysPressed.contains(LogicalKeyboardKey.arrowLeft);
+
+    final bool isRightKeyPressed =
+        keysPressed.contains(LogicalKeyboardKey.keyD) ||
+            keysPressed.contains(LogicalKeyboardKey.arrowRight);
+
+    playerMoveDirection = PlayerMovementDirection.none;
+    if (isLeftKeyPressed && isRightKeyPressed) {
+      playerMoveDirection = PlayerMovementDirection.none;
+    } else if (isLeftKeyPressed) {
+      playerMoveDirection = PlayerMovementDirection.left;
+    } else if (isRightKeyPressed) {
+      playerMoveDirection = PlayerMovementDirection.right;
+    }
+
+    return super.onKeyEvent(event, keysPressed);
   }
 
   void _loadAllAnimations() {
@@ -73,20 +101,29 @@ class Player extends SpriteAnimationGroupComponent
     );
   }
 
-
-  void _updatePlayerMovement(double dt){
+  void _updatePlayerMovement(double dt) {
     double dirX = 0.0;
 
-    switch(playerDirection){
-      case PlayerDirection.left:
+    switch (playerMoveDirection) {
+      case PlayerMovementDirection.left:
+        if (playerFacingDirection == PlayerFacingDirection.right) {
+          flipHorizontallyAroundCenter();
+          playerFacingDirection = PlayerFacingDirection.left;
+        } //우측을 보고 있을 경우 뒤집어서 왼쪽을 보게끔
+
         current = PlayerState.running;
         dirX -= moveSpeed;
         break;
-      case PlayerDirection.right:
+      case PlayerMovementDirection.right:
+        if (playerFacingDirection == PlayerFacingDirection.left) {
+          flipHorizontallyAroundCenter();
+          playerFacingDirection = PlayerFacingDirection.left;
+        } //왼쪽을 보고 있을 경우 뒤집어서 오른쪽을 보게끔
+        playerFacingDirection = PlayerFacingDirection.right;
         current = PlayerState.running;
         dirX += moveSpeed;
         break;
-      case PlayerDirection.none:
+      case PlayerMovementDirection.none:
         current = PlayerState.idle;
         break;
 
@@ -94,7 +131,7 @@ class Player extends SpriteAnimationGroupComponent
     }
 
     velocity = Vector2(dirX, 0.0);
-    position += velocity*dt;
+    position += velocity * dt;
     //만약 프레임이 낮아지게 되면 프레임 간 dt가 커지게 되고 다음 position의 값은 커지게 되므로
     //프레임 간섭에 의한 이동속도 차이가 사라지게 된다.
   }
