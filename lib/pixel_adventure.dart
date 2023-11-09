@@ -5,13 +5,18 @@ import 'package:flame/effects.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
+import 'actors/player.dart';
 import 'levels/level.dart';
 
-class PixelAdventure extends FlameGame with HasKeyboardHandlerComponents, DragCallbacks {
-  late CameraComponent cam;
+class PixelAdventure extends FlameGame
+    with HasKeyboardHandlerComponents, DragCallbacks {
+  late final CameraComponent cam;
   late final JoystickComponent joystick;
-  bool showJoystic = true;
+  late Level level;
+  late Player player;
+  bool showJoystic = false;
 
   @override
   Color backgroundColor() {
@@ -24,12 +29,11 @@ class PixelAdventure extends FlameGame with HasKeyboardHandlerComponents, DragCa
     //성능 이슈를 해결하기 위해 미리 최상위 게임 클래스에서 모든 asset 이미지들을 불러온다
     //이미지를 사용하려면 앞으로 HasGameRef<PixelAdventure>를 mixin을 하여 game.images.fromCache('Main characters/Ninja Frog/Idle (32x32).png')
     //형식으로 이미지를 가져와 사용하도록 하자
-
-    Level level = Level(levelName: 'level-02');
+    player = Player(character: 'Mask Dude', position: Vector2.zero());
+    level = Level(levelName: 'level-02', player: player);
     add(level);
 
     initJoystick();
-
 
     //우선순위는 항상 Camera>HUD>World>Others 로 이뤄져 있음
     //따라서 HUD가 카메라 바로 다음으로 오게끔 카메라컴포넌트의 hudComponents 인자에 HUD 컴포넌트를 추가하면 된다.
@@ -42,7 +46,6 @@ class PixelAdventure extends FlameGame with HasKeyboardHandlerComponents, DragCa
       //그때 밑에 표시된 해상도를 똑같이 적용하면 된다.
     );
 
-
     cam.viewfinder.anchor = Anchor.topLeft; //카메라 고정을 왼쪽 위로 하도록 함.
 
     add(cam);
@@ -52,7 +55,41 @@ class PixelAdventure extends FlameGame with HasKeyboardHandlerComponents, DragCa
     return super.onLoad();
   }
 
-  void initJoystick({double knobOpacity = 0.3, double backgroundOpacity = 0.5}) {
+  @override
+  void update(double dt) {
+    if (showJoystic) {
+      updateJoystic();
+    }
+    super.update(dt);
+  }
+
+  @override
+  KeyEventResult onKeyEvent(RawKeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
+    // TODO : 반드시 최상위 게임 클래스에 HasKeyboardHandlerComponents mixin을 해줘야 사용이 가능하다.
+    final bool isLeftKeyPressed =
+        keysPressed.contains(LogicalKeyboardKey.keyA) ||
+            keysPressed.contains(LogicalKeyboardKey.arrowLeft);
+
+    final bool isRightKeyPressed =
+        keysPressed.contains(LogicalKeyboardKey.keyD) ||
+            keysPressed.contains(LogicalKeyboardKey.arrowRight);
+
+    player.playerMoveDirection = PlayerMovementDirection.none;
+    if (isLeftKeyPressed && isRightKeyPressed) {
+      player.playerMoveDirection = PlayerMovementDirection.none;
+    } else if (isLeftKeyPressed) {
+      player.playerMoveDirection = PlayerMovementDirection.left;
+    } else if (isRightKeyPressed) {
+      player.playerMoveDirection = PlayerMovementDirection.right;
+    }
+
+    return super.onKeyEvent(event, keysPressed);
+  }
+
+
+
+  void initJoystick(
+      {double knobOpacity = 0.3, double backgroundOpacity = 0.5}) {
     //knob의 스프라이트 컴포넌트객체를 추가한다.
     final knobSprite = SpriteComponent(
       size: Vector2.all(30),
@@ -61,9 +98,39 @@ class PixelAdventure extends FlameGame with HasKeyboardHandlerComponents, DragCa
     //추가된 스프라이트 컴포넌트 객체의 색깔을 투명하게 조절한다.
     knobSprite.setColor(Colors.transparent.withOpacity(1 - knobOpacity));
 
-    final backgroundSprite = SpriteComponent(size: Vector2.all(80), sprite: Sprite(images.fromCache('HUD/joystick.png')));
-    backgroundSprite.setColor(Colors.transparent.withOpacity(1 - backgroundOpacity));
+    final backgroundSprite = SpriteComponent(
+        size: Vector2.all(80),
+        sprite: Sprite(images.fromCache('HUD/joystick.png')));
+    backgroundSprite
+        .setColor(Colors.transparent.withOpacity(1 - backgroundOpacity));
 
-    joystick = JoystickComponent(priority: 3, knob: knobSprite, background: backgroundSprite, position: Vector2(60, 280));
+    joystick = JoystickComponent(
+        priority: 3,
+        knob: knobSprite,
+        background: backgroundSprite,
+        position: Vector2(60, 280));
+  }
+
+  void updateJoystic() {
+    switch (joystick.direction) {
+      case JoystickDirection.downLeft:
+      case JoystickDirection.upLeft:
+      case JoystickDirection.left:
+        player.playerMoveDirection = PlayerMovementDirection.left;
+        break;
+      case JoystickDirection.downRight:
+      case JoystickDirection.upRight:
+      case JoystickDirection.right:
+        player.playerMoveDirection = PlayerMovementDirection.right;
+        break;
+      case JoystickDirection.up:
+        break;
+      case JoystickDirection.down:
+        break;
+
+      default:
+        player.playerMoveDirection = PlayerMovementDirection.none;
+        break;
+    }
   }
 }

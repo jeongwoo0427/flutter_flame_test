@@ -25,7 +25,7 @@ class Player extends SpriteAnimationGroupComponent
   late final SpriteAnimation _runningAnimation;
 
   PlayerMovementDirection playerMoveDirection = PlayerMovementDirection.none;
-  PlayerFacingDirection playerFacingDirection = PlayerFacingDirection.right;
+  PlayerFacingDirection _playerFacingDirection = PlayerFacingDirection.right;
   double moveSpeed = 100;
   Vector2 velocity = Vector2.zero();
 
@@ -43,29 +43,6 @@ class Player extends SpriteAnimationGroupComponent
     super.update(dt);
   }
 
-  //키보드의 입력이 감지되면 호출
-  @override
-  bool onKeyEvent(RawKeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
-    // TODO : 반드시 최상위 게임 클래스에 HasKeyboardHandlerComponents mixin을 해줘야 사용이 가능하다.
-    final bool isLeftKeyPressed =
-        keysPressed.contains(LogicalKeyboardKey.keyA) ||
-            keysPressed.contains(LogicalKeyboardKey.arrowLeft);
-
-    final bool isRightKeyPressed =
-        keysPressed.contains(LogicalKeyboardKey.keyD) ||
-            keysPressed.contains(LogicalKeyboardKey.arrowRight);
-
-    playerMoveDirection = PlayerMovementDirection.none;
-    if (isLeftKeyPressed && isRightKeyPressed) {
-      playerMoveDirection = PlayerMovementDirection.none;
-    } else if (isLeftKeyPressed) {
-      playerMoveDirection = PlayerMovementDirection.left;
-    } else if (isRightKeyPressed) {
-      playerMoveDirection = PlayerMovementDirection.right;
-    }
-
-    return super.onKeyEvent(event, keysPressed);
-  }
 
   void _loadAllAnimations() {
     _idleAnimation =
@@ -106,20 +83,20 @@ class Player extends SpriteAnimationGroupComponent
 
     switch (playerMoveDirection) {
       case PlayerMovementDirection.left:
-        if (playerFacingDirection == PlayerFacingDirection.right) {
+        if (_playerFacingDirection == PlayerFacingDirection.right) {
           flipHorizontallyAroundCenter();
-          playerFacingDirection = PlayerFacingDirection.left;
+          _playerFacingDirection = PlayerFacingDirection.left;
         } //우측을 보고 있을 경우 뒤집어서 왼쪽을 보게끔
 
         current = PlayerState.running;
         dirX -= moveSpeed;
         break;
       case PlayerMovementDirection.right:
-        if (playerFacingDirection == PlayerFacingDirection.left) {
+        if (_playerFacingDirection == PlayerFacingDirection.left) {
           flipHorizontallyAroundCenter();
-          playerFacingDirection = PlayerFacingDirection.left;
+          _playerFacingDirection = PlayerFacingDirection.left;
         } //왼쪽을 보고 있을 경우 뒤집어서 오른쪽을 보게끔
-        playerFacingDirection = PlayerFacingDirection.right;
+        _playerFacingDirection = PlayerFacingDirection.right;
         current = PlayerState.running;
         dirX += moveSpeed;
         break;
