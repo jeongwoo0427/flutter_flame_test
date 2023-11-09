@@ -1,16 +1,17 @@
 import 'dart:ui';
 
 import 'package:flame/components.dart';
+import 'package:flame/effects.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 
 import 'levels/level.dart';
 
-class PixelAdventure extends FlameGame
-    with HasKeyboardHandlerComponents, DragCallbacks {
+class PixelAdventure extends FlameGame with HasKeyboardHandlerComponents, DragCallbacks {
   late CameraComponent cam;
-  late JoystickComponent joystick;
+  late final JoystickComponent joystick;
+  bool showJoystic = true;
 
   @override
   Color backgroundColor() {
@@ -25,8 +26,12 @@ class PixelAdventure extends FlameGame
     //형식으로 이미지를 가져와 사용하도록 하자
 
     Level level = Level(levelName: 'level-02');
+    initJoystick();
 
+    //우선순위는 항상 Camera>HUD>World>Others 로 이뤄져 있음
+    //따라서 HUD가 카메라 바로 다음으로 오게끔 카메라컴포넌트의 hudComponents 인자에 HUD 컴포넌트를 추가하면 된다.
     cam = CameraComponent.withFixedResolution(
+      hudComponents: [if (showJoystic) joystick],
       world: level,
       width: 640,
       height: 368,
@@ -41,24 +46,21 @@ class PixelAdventure extends FlameGame
     //addAll([cam, level]);
     //또는 addAll([cam,myWorld]); 도 가능
 
-    //스마트폰 전용 조이스틱 추가
-    initJoystick();
-
     return super.onLoad();
   }
 
-  void initJoystick() {
-    //joystick 객체에 조이스틱 컴포넌트를 이미지들과 함께 넣음.
-    joystick = JoystickComponent(
-        priority: 10,
-        knob: SpriteComponent(
-          sprite: Sprite(images.fromCache('HUD/knob.png')),
-        ),
-        background: SpriteComponent(
-            sprite: Sprite(images.fromCache('HUD/joystick.png'))),
-        margin: EdgeInsets.only(left: 32, bottom: 32) //
-        );
+  void initJoystick({double knobOpacity = 0.3, double backgroundOpacity = 0.5}) {
+    //knob의 스프라이트 컴포넌트객체를 추가한다.
+    final knobSprite = SpriteComponent(
+      size: Vector2.all(30),
+      sprite: Sprite(images.fromCache('HUD/knob.png')),
+    );
+    //추가된 스프라이트 컴포넌트 객체의 색깔을 투명하게 조절한다.
+    knobSprite.setColor(Colors.transparent.withOpacity(1 - knobOpacity));
 
-    add(joystick);
+    final backgroundSprite = SpriteComponent(size: Vector2.all(80), sprite: Sprite(images.fromCache('HUD/joystick.png')));
+    backgroundSprite.setColor(Colors.transparent.withOpacity(1 - backgroundOpacity));
+
+    joystick = JoystickComponent(priority: 3, knob: knobSprite, background: backgroundSprite, position: Vector2(60, 280));
   }
 }
